@@ -189,7 +189,7 @@ export default function UserInfo() {
                                 type="password"
                                 {...registerPassword("reTypedPassword", {
                                     required: "Potwierdzenie hasła jest wymagane",
-                                    // validate: value => value === password || "Hasła nie są takie same",
+                                    validate: value => value === password || "Hasła nie są takie same",
                                 })}
                                 placeholder="Potwierdź hasło"
                                 errors={errorsPassword}
