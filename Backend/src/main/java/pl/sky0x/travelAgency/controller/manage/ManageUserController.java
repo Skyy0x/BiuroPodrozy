@@ -2,10 +2,8 @@ package pl.sky0x.travelAgency.controller.manage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.sky0x.travelAgency.model.user.User;
 import pl.sky0x.travelAgency.repository.UserRepository;
@@ -21,7 +19,7 @@ public class ManageUserController {
 
     @GetMapping
     public ResponseEntity<ResponseMessage> getUsers() {
-        return ApiResponse.createSuccessResponse(User.class, userRepository.findAll());
+        return ApiResponse.success(User.class, userRepository.findAll());
     }
 
 }

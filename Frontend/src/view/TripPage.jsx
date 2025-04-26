@@ -37,7 +37,7 @@ export default function TripPage() {
                         </div>
 
                         <div className="flex flex-col justify-between w-full lg:w-1/2">
-                            <p className="text-gray-600">{trip.description}</p>
+                            <p className="text-gray-600 max-w-full lg:max-w-[400px] break-words">{trip.description}</p>
                             <div className="text-sm text-gray-500 mt-4 space-y-1">
                                 <p>
                                     Maksymalna liczba osób: <span className="text-black">{trip.maxPeople}</span>

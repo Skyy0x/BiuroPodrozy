@@ -88,6 +88,7 @@ export default function UserInfo() {
         api.patch("/user/password", {
             currentPassword: data.currentPassword,
             password: data.password,
+            reTypedPassword: data.reTypedPassword
         })
         .then(() => {
             setPasswordSuccess("Hasło zmienione pomyślnie");
@@ -186,14 +187,14 @@ export default function UserInfo() {
                         <FormGroup label="Potwierdź hasło">
                             <Input
                                 type="password"
-                                {...registerPassword("reTypePassword", {
+                                {...registerPassword("reTypedPassword", {
                                     required: "Potwierdzenie hasła jest wymagane",
-                                    validate: value => value === password || "Hasła nie są takie same",
+                                    // validate: value => value === password || "Hasła nie są takie same",
                                 })}
                                 placeholder="Potwierdź hasło"
                                 errors={errorsPassword}
                             />
-                            <InputError errors={errorsPassword} name="reTypePassword" />
+                            <InputError errors={errorsPassword} name="reTypedPassword" />
                         </FormGroup>
 
                         <SubmitButton label="Zmień hasło" />

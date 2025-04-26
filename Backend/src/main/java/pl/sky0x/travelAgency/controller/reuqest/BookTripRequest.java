@@ -1,9 +1,13 @@
 package pl.sky0x.travelAgency.controller.reuqest;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 
 public class BookTripRequest {
 
+    @NotEmpty(message = "{customers.notEmpty}")
+    @Valid
     private Collection<CustomerRequest> customers;
 
     public BookTripRequest() {

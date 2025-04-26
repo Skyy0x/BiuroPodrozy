@@ -1,14 +1,23 @@
 package pl.sky0x.travelAgency.controller.reuqest;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import pl.sky0x.travelAgency.model.travel.Gender;
 
 import java.time.LocalDate;
 
 public class CustomerRequest {
 
+    @NotBlank(message = "{firstName.notBlank}")
     private String firstName;
+
+    @NotBlank(message = "{lastName.notBlank}")
     private String lastName;
+
+    @NotBlank(message = "{birthDate.notBlank}")
     private LocalDate birthDate;
+
+    @NotNull(message = "{gender.notNull}")
     private Gender gender;
 
     public CustomerRequest() {

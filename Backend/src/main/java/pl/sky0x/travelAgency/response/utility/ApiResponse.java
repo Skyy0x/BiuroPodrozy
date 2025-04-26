@@ -7,66 +7,53 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.sky0x.travelAgency.response.ResponseData;
 import pl.sky0x.travelAgency.response.ResponseMessage;
 
-import java.util.Collection;
 import java.util.Map;
 
-public final class ApiResponse  {
+public final class ApiResponse {
 
-    private ApiResponse() {
+    private ApiResponse() {}
 
+    public static ResponseEntity<ResponseMessage> ok(HttpServletRequest request, ResponseData data) {
+        return buildResponse(request.getRequestURI(), HttpStatus.OK, data);
     }
 
-    public static ResponseEntity<ResponseMessage> success(HttpServletRequest request, String message) {
-        return success(request, ResponseData.create("message", message));
-    }
-
-    public static ResponseEntity<ResponseMessage> success(HttpServletRequest request, ResponseData responseData) {
-        return createResponse(request, HttpStatus.OK, responseData);
-    }
-
-    public static ResponseEntity<ResponseMessage> badRequest(HttpServletRequest request, Exception exception) {
-        return createResponse(request, HttpStatus.BAD_REQUEST, ResponseData.create("error", exception.getMessage()));
-    }
-
-    public static ResponseEntity<ResponseMessage> createResponse(HttpServletRequest request, HttpStatus status, ResponseData data) {
-        final ResponseMessage responseMessage = new ResponseMessage(
-                request.getRequestURI(),
-                status,
-                data
-        );
-
-        return ResponseEntity.status(status).body(responseMessage);
-    }
-
-    public static ResponseEntity<ResponseMessage> createSuccessResponse(String entityName, Object object) {
-        ResponseData responseData = ResponseData.create(entityName, object);
-
+    public static ResponseEntity<ResponseMessage> createErrorResponse(Map<String, Object> errors) {
         ResponseMessage responseMessage = new ResponseMessage(
-                ServletUriComponentsBuilder.fromCurrentRequest().toUriString(),
-                HttpStatus.OK,
-                responseData
+                null,
+                HttpStatus.BAD_REQUEST,
+                ResponseData.create("errors", errors)
         );
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMessage);
     }
 
-    public static ResponseEntity<ResponseMessage> createSuccessResponse(Class<?> type, Object object) {
-        return createSuccessResponse(getEntityName(type), object);
+    public static ResponseEntity<ResponseMessage> withStatus(HttpServletRequest request, HttpStatus status, ResponseData data) {
+        return buildResponse(request.getRequestURI(), status, data);
     }
 
-    private static String getEntityName(Class<?> type) {
-        String className = type.getSimpleName().toLowerCase();
-
-        return pluralize(className);
+    public static ResponseEntity<ResponseMessage> success(String resourceName, Object content) {
+        String requestUri = ServletUriComponentsBuilder.fromCurrentRequest().toUriString();
+        ResponseData payload = ResponseData.create(resourceName, content);
+        return buildResponse(requestUri, HttpStatus.OK, payload);
     }
 
-    private static String pluralize(String word) {
-        if (word.endsWith("y")) {
-            return word.substring(0, word.length() - 1) + "ies";
-        } else if (word.endsWith("s") || word.endsWith("x") || word.endsWith("z") || word.endsWith("ch") || word.endsWith("sh")) {
-            return word + "es";
-        } else {
-            return word + "s";
+    public static ResponseEntity<ResponseMessage> success(Class<?> entityClass, Object content) {
+        String resourceName = toPlural(entityClass.getSimpleName().toLowerCase());
+        return success(resourceName, content);
+    }
+
+    private static ResponseEntity<ResponseMessage> buildResponse(String uri, HttpStatus status, ResponseData data) {
+        ResponseMessage body = new ResponseMessage(uri, status, data);
+        return ResponseEntity.status(status).body(body);
+    }
+
+    private static String toPlural(String name) {
+        if (name.endsWith("y")) {
+            return name.substring(0, name.length() - 1) + "ies";
         }
+        if (name.matches(".*(s|x|z|ch|sh)$")) {
+            return name + "es";
+        }
+        return name + "s";
     }
 }

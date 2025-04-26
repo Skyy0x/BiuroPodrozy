@@ -1,11 +1,30 @@
 package pl.sky0x.travelAgency.controller.reuqest.auth;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import pl.sky0x.travelAgency.validation.ValidCountry;
+
 public class RegisterRequest {
 
+    @NotBlank(message = "{username.notBlank}")
+    @Size(min = 3, max = 50, message = "{username.size}")
     private String username;
+
+    @NotBlank(message = "{password.notBlank}")
+    @Size(min = 6, message = "{password.size}")
     private String password;
+
+    @NotBlank(message = "{country.notBlank}")
+    @ValidCountry(message = "{country.invalid}")
     private String country;
+
+    @NotBlank(message = "{email.notBlank}")
+    @Email(message = "{email.invalid}")
     private String email;
+
+    @NotBlank(message = "{phone.notBlank}")
+    @Size(min = 6, max = 15, message = "{phone.size}")
     private String phone;
 
     public RegisterRequest() {

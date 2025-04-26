@@ -14,57 +14,71 @@ import pl.sky0x.travelAgency.throwable.UsernameExistsException;
 @Service
 public class UserService {
 
+    private static final String USER_NOT_FOUND_MESSAGE = "User does not exist.";
+    private static final String INCORRECT_PASSWORD_MESSAGE = "Current password is incorrect.";
+    private static final String WEAK_PASSWORD_MESSAGE = "Password is too weak.";
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder encoder;
+    private PasswordEncoder passwordEncoder;
 
-    public User updateUserInfo(Long id, UserInfoRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new BadCredentialsException("User doesn't exist."));
+    public User updateUserInfo(Long userId, UserInfoRequest request) {
+        User user = getUserById(userId);
 
-        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
-            userRepository.findByUsername(request.getUsername())
-                    .ifPresent(existing -> {
-                        throw new UsernameExistsException("User named " + request.getUsername() + " already exists.");
-                    });
-            user.setUsername(request.getUsername());
-        }
-
-        if (request.getPhone() != null) {
-            user.setPhoneNumber(request.getPhone());
-        }
+        updateUsernameIfChanged(user, request.getUsername());
+        updatePhoneNumberIfPresent(user, request.getPhone());
 
         return userRepository.save(user);
     }
 
-    public User updateUserPassword(Long id, PasswordRequest passwordRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new BadCredentialsException("User does not exist."));
+    public User updateUserPassword(Long userId, PasswordRequest request) {
+        User user = getUserById(userId);
 
-        String currentPassword = passwordRequest.getCurrentPassword();
-        String newPassword = passwordRequest.getPassword();
+        validateCurrentPassword(user, request.getCurrentPassword());
+        validateNewPasswordStrength(request.getPassword());
 
-        if (!encoder.matches(currentPassword, user.getPassword())) {
-            throw new BadCredentialsException("Current password is incorrect.");
-        }
-
-        if (newPassword == null || !AuthenticateService.PATTERN.matcher(newPassword).matches()) {
-            throw new PasswordException("Password is too weak.");
-        }
-
-        user.setPassword(encoder.encode(newPassword));
-
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         return userRepository.save(user);
     }
 
-    public String deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new BadCredentialsException("User does not exist."));
-
+    public String deleteUser(Long userId) {
+        User user = getUserById(userId);
         userRepository.delete(user);
-
         return "User deleted";
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BadCredentialsException(USER_NOT_FOUND_MESSAGE));
+    }
+
+    private void updateUsernameIfChanged(User user, String newUsername) {
+        if (newUsername != null && !newUsername.equals(user.getUsername())) {
+            userRepository.findByUsername(newUsername)
+                    .ifPresent(existing -> {
+                        throw new UsernameExistsException("User named " + newUsername + " already exists.");
+                    });
+            user.setUsername(newUsername);
+        }
+    }
+
+    private void updatePhoneNumberIfPresent(User user, String phoneNumber) {
+        if (phoneNumber != null) {
+            user.setPhoneNumber(phoneNumber);
+        }
+    }
+
+    private void validateCurrentPassword(User user, String currentPassword) {
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new BadCredentialsException(INCORRECT_PASSWORD_MESSAGE);
+        }
+    }
+
+    private void validateNewPasswordStrength(String newPassword) {
+        if (newPassword == null || !AuthenticateService.PATTERN.matcher(newPassword).matches()) {
+            throw new PasswordException(WEAK_PASSWORD_MESSAGE);
+        }
     }
 }

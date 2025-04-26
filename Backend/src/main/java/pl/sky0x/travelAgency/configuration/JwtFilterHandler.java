@@ -44,8 +44,6 @@ public class JwtFilterHandler extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String servletPath = request.getServletPath();
 
-        System.out.println("XDDDDD123");
-
         if (servletPath.contains("/api/authenticate/")) {
             filterChain.doFilter(request, response);
             return;
@@ -54,15 +52,11 @@ public class JwtFilterHandler extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
-            System.out.println("dupa");
             filterChain.doFilter(request, response);
             return;
         }
 
         String jwt = authHeader.substring(7);
-
-        System.out.println(jwt);
         try {
             Long id = Long.parseLong(jwtService.extractId(jwt));
 
@@ -75,8 +69,6 @@ public class JwtFilterHandler extends OncePerRequestFilter {
 
             boolean isTokenValid = optionalToken.isPresent() && !optionalToken.get().isExpired();
 
-            System.out.println(user.getRole().name());
-
             if (jwtService.isTokenValid(jwt, user) && isTokenValid) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         user,
@@ -87,7 +79,6 @@ public class JwtFilterHandler extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception ignored) {
-            System.out.println(ignored);
         }
         filterChain.doFilter(request, response);
     }

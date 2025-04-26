@@ -30,6 +30,8 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/trips/**").permitAll()
                 .requestMatchers("/api/manage/trips/**").permitAll()
+                .requestMatchers("/api/user/**").permitAll()
+                .requestMatchers("/api/bookings/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

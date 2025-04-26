@@ -100,6 +100,10 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

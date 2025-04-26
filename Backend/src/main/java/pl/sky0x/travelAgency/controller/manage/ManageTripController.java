@@ -31,7 +31,7 @@ public class ManageTripController {
 
     @GetMapping
     public ResponseEntity<ResponseMessage> getTrips() {
-        return ApiResponse.createSuccessResponse(Trip.class, tripRepository.findAll());
+        return ApiResponse.success(Trip.class, tripRepository.findAll());
     }
 
     @GetMapping("/{id}")
@@ -49,22 +49,22 @@ public class ManageTripController {
                 ))
                 .toList();
 
-        return ApiResponse.createSuccessResponse(Booking.class, responses);
+        return ApiResponse.success(Booking.class, responses);
     }
 
     @PostMapping
     public ResponseEntity<ResponseMessage> createTrip(@RequestBody TripRequest tripRequest) {
-        return ApiResponse.createSuccessResponse(Trip.class, tripService.createTrip(tripRequest));
+        return ApiResponse.success(Trip.class, tripService.createTrip(tripRequest));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseMessage> updateTrip(@PathVariable("id") Long id, @RequestBody TripRequest tripRequest) {
-        return ApiResponse.createSuccessResponse(Trip.class, tripService.updateTrip(id, tripRequest));
+        return ApiResponse.success(Trip.class, tripService.updateTrip(id, tripRequest));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseMessage> deleteTrip(@PathVariable("id") Long id) {
         tripService.deleteTrip(id);
-        return ApiResponse.createSuccessResponse("message", "Trip has been deleted.");
+        return ApiResponse.success("message", "Trip has been deleted.");
     }
 }

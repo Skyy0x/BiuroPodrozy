@@ -2,21 +2,21 @@ package pl.sky0x.travelAgency.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import pl.sky0x.travelAgency.controller.reuqest.PasswordRequest;
 import pl.sky0x.travelAgency.controller.reuqest.UserInfoRequest;
 import pl.sky0x.travelAgency.model.travel.Booking;
-import pl.sky0x.travelAgency.model.travel.Trip;
 import pl.sky0x.travelAgency.model.user.User;
 import pl.sky0x.travelAgency.repository.BookingRepository;
 import pl.sky0x.travelAgency.repository.UserRepository;
 import pl.sky0x.travelAgency.response.ResponseMessage;
 import pl.sky0x.travelAgency.response.utility.ApiResponse;
 import pl.sky0x.travelAgency.service.UserService;
+import pl.sky0x.travelAgency.validation.ValidateUser;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -33,110 +33,67 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    @RequestMapping(path = {"/role"})
-    public ResponseEntity<ResponseMessage> getUserRole(
-            @AuthenticationPrincipal User user
-    ) {
-        if(user == null) {
-            throw new BadCredentialsException("User isn't logged.");
-        }
-        return ApiResponse.createSuccessResponse("role", user.getRole().name());
+    @GetMapping("/role")
+    @ValidateUser
+    public ResponseEntity<ResponseMessage> getUserRole(@AuthenticationPrincipal User user) {
+        return ApiResponse.success("role", user.getRole().name());
     }
 
-    @GetMapping
-    @RequestMapping(path = {"/bookings"})
-    public ResponseEntity<ResponseMessage> getUserBookings(
-            @AuthenticationPrincipal User user
-    ) {
-        if(user == null) {
-            throw new BadCredentialsException("User isn't logged.");
-        }
-
-        return ApiResponse.createSuccessResponse(Booking.class, bookingRepository.findByUserId(user.getId()));
+    @GetMapping("/bookings")
+    @ValidateUser
+    public ResponseEntity<ResponseMessage> getUserBookings(@AuthenticationPrincipal User user) {
+        List<Booking> bookings = bookingRepository.findByUserId(user.getId());
+        return ApiResponse.success(Booking.class, bookings);
     }
 
-    @GetMapping
-    @RequestMapping(path = {"/history"})
-    public ResponseEntity<ResponseMessage> getUserHistory(
-            @AuthenticationPrincipal User user
-    ) {
-        if (user == null) {
-            throw new BadCredentialsException("User isn't logged.");
-        }
-
-        List<Booking> allBookings = bookingRepository.findByUserId(user.getId());
-
-        List<Booking> historyBookings = allBookings.stream()
+    @GetMapping("/history")
+    @ValidateUser
+    public ResponseEntity<ResponseMessage> getUserBookingHistory(@AuthenticationPrincipal User user) {
+        List<Booking> history = bookingRepository.findByUserId(user.getId()).stream()
                 .filter(booking -> booking.getTrip().getEndDate().isBefore(LocalDate.now()))
                 .toList();
-
-        return ApiResponse.createSuccessResponse(Booking.class, historyBookings);
+        return ApiResponse.success(Booking.class, history);
     }
 
-    @DeleteMapping
-    @RequestMapping(path = {"/delete"})
-    public ResponseEntity<ResponseMessage> deleteUser(
-            @AuthenticationPrincipal User user
-    ) {
-        if(user == null) {
-            throw new BadCredentialsException("User isn't logged.");
-        }
-
-        Long id = userRepository.findById(user.getId())
-                .map(User::getId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found in database."));
-
-        return ApiResponse.createSuccessResponse("message", userService.deleteUser(id));
+    @DeleteMapping("/delete")
+    @ValidateUser
+    public ResponseEntity<ResponseMessage> deleteUserAccount(@AuthenticationPrincipal User user) {
+        Long userId = getUserId(user);
+        return ApiResponse.success("message", userService.deleteUser(userId));
     }
 
     @GetMapping
-    public ResponseEntity<ResponseMessage> getUserInfo(
-            @AuthenticationPrincipal User user
-    ) {
-        if (user == null) {
-            throw new BadCredentialsException("User isn't logged in.");
-        }
-
+    @ValidateUser
+    public ResponseEntity<ResponseMessage> getUserInfo(@AuthenticationPrincipal User user) {
         return userRepository.findById(user.getId())
-                .map(foundUser -> ApiResponse.createSuccessResponse("user", foundUser))
+                .map(foundUser -> ApiResponse.success("user", foundUser))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found in database."));
     }
 
-    @PatchMapping
-    @RequestMapping(path = {"/info"})
+    @PatchMapping("/info")
+    @ValidateUser
     public ResponseEntity<ResponseMessage> updateUserInfo(
             @AuthenticationPrincipal User user,
-            @RequestBody UserInfoRequest request
+            @Valid @RequestBody UserInfoRequest request
     ) {
-        if (user == null) {
-            throw new BadCredentialsException("User isn't logged in.");
-        }
-
-        Long id = userRepository.findById(user.getId())
-                .map(User::getId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found in database."));
-
-        return ApiResponse.createSuccessResponse("user", userService.updateUserInfo(id, request));
+        Long userId = getUserId(user);
+        return ApiResponse.success("user", userService.updateUserInfo(userId, request));
     }
 
-    @PatchMapping
-    @RequestMapping(path = {"/password"})
+    @PatchMapping("/password")
+    @ValidateUser
     public ResponseEntity<ResponseMessage> updateUserPassword(
             @AuthenticationPrincipal User user,
-            @RequestBody PasswordRequest request
+            @Valid @RequestBody PasswordRequest request
     ) {
-        if (user == null) {
-            throw new BadCredentialsException("User isn't logged in.");
-        }
-
-        Long id = userRepository.findById(user.getId())
-                .map(User::getId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found in database."));
-
-        return ApiResponse.createSuccessResponse("user", userService.updateUserPassword(id, request));
+        Long userId = getUserId(user);
+        return ApiResponse.success("user", userService.updateUserPassword(userId, request));
     }
 
-
+    private Long getUserId(User user) {
+        return userRepository.findById(user.getId())
+                .map(User::getId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found in database."));
+    }
 
 }

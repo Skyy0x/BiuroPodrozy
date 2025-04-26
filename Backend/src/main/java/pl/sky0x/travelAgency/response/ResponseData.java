@@ -4,13 +4,16 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-
 public class ResponseData {
 
     private final Map<String, Object> data;
 
     public ResponseData() {
         this.data = new IdentityHashMap<>();
+    }
+
+    public ResponseData(Map<String, Object> map) {
+        this.data = map;
     }
 
     public static ResponseData create(String key, Object value) {

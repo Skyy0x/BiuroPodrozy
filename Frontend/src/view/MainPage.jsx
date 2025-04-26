@@ -152,26 +152,34 @@ export default function MainPage() {
                             </div>
                         </div>
 
-                        <div>
+                        <div className="mb-4">
                             <p className="text-gray-700 font-bold text-lg pb-1">Data wycieczki</p>
-                            <div className="flex items-center space-x-2 mb-4">
+                            <div className="flex flex-col sm:flex-row items-center gap-2 w-full min-w-0">
+                                <div className="flex-1 min-w-0">
                                 <Input 
                                     type="date"
                                     name="startDate"
-                                    className="w-full px-2 py-1 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     {...register("startDate", {required: false})}
                                     errors={errors}
                                 />
-                                <span className="text-black font-bold">-</span>
+                                </div>
+
+                                <div className="text-black font-bold">-</div>
+
+                                <div className="flex-1 min-w-0">
                                 <Input 
                                     type="date"
                                     name="endDate"
-                                    className="w-full px-2 py-1 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     {...register("endDate", {required: false})}
                                     errors={errors}
                                 />
+                                </div>
                             </div>
                         </div>
+
+
 
                         <div className="mb-4">
                             <p className="text-gray-700 font-bold text-lg pb-1">Liczba osób</p>
